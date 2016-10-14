@@ -25,9 +25,10 @@
   },
   "homepage": "https://github.com/vasanthk/react-es6-webpack-boilerplate",
   "dependencies": {
+    "babel-runtime": "^6.3.19",
     "react": "^0.14.5",
-    "react-dom": "^0.14.5",
-    "babel-runtime": "^6.3.19"
+    "react-bootstrap": "^0.30.5",
+    "react-dom": "^0.14.5"
   },
   "devDependencies": {
     "babel-core": "^6.3.21",
@@ -41,6 +42,7 @@
     "cross-env": "^3.1.1",
     "eslint": "^0.21.2",
     "eslint-plugin-react": "^2.3.0",
+    "react-bootstrap": "^0.30.5",
     "react-transform-hmr": "^1.0.1",
     "webpack": "^1.8.4",
     "webpack-dev-server": "^1.8.0"

@@ -1,20 +1,11 @@
 import React from 'react';
 import {render} from 'react-dom';
 import App from './App';
+import CharacterList from './CharacterList';
+import ComicList from './ComicList';
+import MarbelApi from './marvel_api';
+import SearchBar from './SearchBar';
 
-function hitAPI (query,fn){
-    let xhr = new XMLHttpRequest();
-    console.log(query);
-    xhr.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            var chars = JSON.parse(this.responseText);
-            return fn(chars)
-            //chars["data"]["results"]
-        }
-    };
-    xhr.open("GET", "http://gateway.marvel.com:80/v1/public/characters?ts=1&nameStartsWith=" + query + "&limit=100&apikey=039eb48267ed197802f5e77e78d0f3f5&hash=e90ab34566660a82686c9d188a356fbd");
-    xhr.send();
-};
 /////////////////////////////////////////////////
 var Navbar = ReactBootstrap.Navbar,
     Nav = ReactBootstrap.Nav,
@@ -56,54 +47,6 @@ const navbarInstance = (
     </Navbar>
 );
 
-let CharacterList = React.createClass({
-    getInitialState: function() {
-        return({ characters: [],
-               filterText: "",
-               view: "",
-               charId: ""})
-    },
-    handleSearchBar: function(text){
-        this.setState({ filterText: text});
-        hitAPI(text, function(chars){
-            let charsArray = chars["data"]["results"];
-            this.setState({ characters: charsArray });
-        }.bind(this))
-    },
-    handleEnterDetailedView: function(e) {
-        this.setState({view: "detail",
-                      charId: e.target.value});
-    },
-    renderDetail: function() {
-        let charId = this.state.charId;
-        let char = this.state.characters.find(function(character) {
-            return character.id == charId;
-        });
-        console.log(char);
-        return(
-            <div><CharacterDetail name={ char.name } description={ char.description } picture={ char.thumbnail.path } comics={ char.comics.items } stories={ char.stories.items } events={ char.events.items } series={ char.series.items }/></div>
-        )
-    },
-    renderList: function(){
-        let characterRows = [];
-        //let searchCharacterInput = <input className='new-item' type="text" onChange={this.handleSearchBar}/>;
-        this.state.characters.forEach((character, index) => {
-            characterRows.push(<li><p><CharacterRow name={ character.name } picture={ character.thumbnail.path+".jpg" } key={ character.id } id={ character.id } />
-                               <button className="btn" onClick={this.handleEnterDetailedView} value={ character.id }>View</button></p>
-                               </li>);
-        })
-        return(<div>
-               Look for a superhero: <SearchBar onUserInput={this.handleSearchBar} filterText={this.state.filterText}/>
-               <ul className="three-columns">{ characterRows }</ul>
-               </div>)
-    },
-    render: function(){
-        if (this.state.view === "detail")
-            return this.renderDetail();
-        else
-            return this.renderList();
-    }
-});
 
 let CharacterRow = React.createClass({
     render: function() {
@@ -135,115 +78,6 @@ let CharacterDetail = React.createClass({
     }
 });
 
-let SearchBar = React.createClass({
-    getInitialState: function() {
-        return({ content: "" });
-    },
-    handleInput: function(e){
-        this.props.onUserInput(e.target.value);
-    },
-    render: function() {
-        return(<div><input type="text" value={this.props.filterText} onChange={this.handleInput} /></div>)
-    }
-});
-///////////////////////////////////////// COMIC LIST
-// const thumbnailInstance = (
-// <Grid>
-// <Row>
-// <Col xs={6} md={4}>
-//   <Thumbnail src="/assets/thumbnaildiv.png" alt="242x200">
-//     <h3>{comicRows[key].name}</h3>
-//     <p>Description</p>
-//     <p>
-//       <Button bsStyle="primary">Button</Button>&nbsp;
-//       <Button bsStyle="default">Button</Button>
-//     </p>
-//   </Thumbnail>
-// </Col>
-// <Col xs={6} md={4}>
-//   <Thumbnail src="/assets/thumbnaildiv.png" alt="242x200">
-//     <h3>Thumbnail label</h3>
-//     <p>Description</p>
-//     <p>
-//       <Button bsStyle="primary">Button</Button>&nbsp;
-//       <Button bsStyle="default">Button</Button>
-//     </p>
-//   </Thumbnail>
-// </Col>
-// <Col xs={6} md={4}>
-//   <Thumbnail src="/assets/thumbnaildiv.png" alt="242x200">
-//     <h3>Thumbnail label</h3>
-//     <p>Description</p>
-//     <p>
-//       <Button bsStyle="primary">Button</Button>&nbsp;
-//       <Button bsStyle="default">Button</Button>
-//     </p>
-//   </Thumbnail>
-// </Col>
-// </Row>
-// </Grid>
-// );
-
-let ComicList = React.createClass({
-    getInitialState: function(){
-        return({ comics: [],
-               filterText: ""});
-    },
-    handleSearchBar: function(text) {
-        this.setState({filterText: text});
-        this.apiCall(text, function(coms){
-            let comsArray = coms["data"]["results"];
-            this.setState({ comics: comsArray });
-        }.bind(this))
-    },
-    render: function() {
-        let comicRows = this.state.comics.map((comic) => {
-            return (
-                <div><Col xs={6} md={4}>
-                <Thumbnail src={ comic.thumbnail.path+".jpg" } alt="242x200">
-                <h3>{ comic.title }</h3>
-                <p>{ comic.description }</p>
-                <p>
-                <Button bsStyle="primary">View</Button>
-                <Button bsStyle="default">Add to cart</Button>
-                </p>
-                </Thumbnail>
-                </Col></div>)});
-            //<li><ComicRow key={ comic.id } name={ comic.title } description={ comic.description } picture={ comic.thumbnail.path }/></li>)
-            return(
-                <div>
-                <Grid>
-                <Row>
-                { comicRows }
-                </Row>
-                </Grid>
-                <p>Look for a comic: <SearchBar onUserInput={this.handleSearchBar} filterText={this.state.filterText}/></p>
-                </div>
-            )
-    },
-    apiCall: function(query, fn) {
-        let xhr = new XMLHttpRequest();
-        console.log(query);
-        xhr.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var chars = JSON.parse(this.responseText);
-                return fn(chars)
-            }
-        };
-        xhr.open("GET", "http://gateway.marvel.com:80/v1/public/comics?ts=1&titleStartsWith=" + query + "&limit=100&apikey=039eb48267ed197802f5e77e78d0f3f5&hash=e90ab34566660a82686c9d188a356fbd");
-        xhr.send();
-    }
-});
-
-let ComicRow = React.createClass({
-    render: function(){
-        return( <div>
-               <p>Comic: { this.props.name }</p>
-               <img src={ this.props.picture+".jpg"} width="300" height="300"/>
-               <p>{ this.props.description }</p>
-               </div>)
-    }
-});
 
 ReactDOM.render(<CharacterList />, document.getElementById("main"));
 ReactDOM.render(<ComicList />, document.getElementById("comics"));
